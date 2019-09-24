@@ -1,5 +1,32 @@
 ---
-- hosts: all
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ceph_groups:
+      - ceph-grafana
+      # These are roles used by ceph-ansible
+      - mons
+      - agents
+      - osds
+      - mdss
+      - rgws
+      - nfss
+      - restapis
+      - rbdmirrors
+      - clients
+      - mgrs
+      - iscsis
+      # This role is (so far) only used for testing
+      - cluster
+  tasks:
+    - name: Creating one group containing all ceph groups - ceph_all
+      add_host:
+        name: "{{ item }}"
+        groups: "ceph_all"
+      loop: "{{ lookup('inventory_hostnames', ceph_groups|join(':'), wantlist=True) }}"
+
+- hosts: ceph_all
   gather_facts: true
   any_errors_fatal: true
   tags:
